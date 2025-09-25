@@ -1,0 +1,27 @@
+<mat-nav-list class="list-horizontal">
+  <ng-container *ngFor="let menu of menus">
+    <a mat-list-item *ngIf="!menu.children" [routerLink]="menu.link">{{ menu.name }}</a>
+
+    <a mat-list-item *ngIf="menu.children" [matMenuTriggerFor]="menuTrigger">
+      {{ menu.name }}
+      <mat-icon *ngIf="menu.children">expand_more</mat-icon> 
+    </a>
+
+    <mat-menu #menuTrigger="matMenu">
+      <ng-container *ngFor="let subMenu of menu.children">
+        <a mat-menu-item *ngIf="!subMenu.children" [routerLink]="subMenu.link">{{ subMenu.name }}</a>
+
+        <a mat-menu-item *ngIf="subMenu.children" [matMenuTriggerFor]="subMenuTrigger" [routerLink]="subMenu.link">
+          {{ subMenu.name }}
+          <mat-icon *ngIf="subMenu.children">chevron_right</mat-icon>
+        </a>
+
+        <mat-menu #subMenuTrigger="matMenu">
+          <ng-container *ngFor="let subSubMenu of subMenu.children">
+            <a mat-menu-item [routerLink]="subSubMenu.link">{{ subSubMenu.name }}</a>
+          </ng-container>
+        </mat-menu>
+      </ng-container>
+    </mat-menu>
+  </ng-container>
+</mat-nav-list>

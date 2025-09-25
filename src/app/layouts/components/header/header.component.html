@@ -1,0 +1,40 @@
+<mat-sidenav-container>
+  <mat-sidenav #sidenav mode="push" position="end" fxHide.gt-sm>
+    <app-mobile-menu (closeMenu)="sidenav.close()"></app-mobile-menu>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="navbar">
+      <mat-toolbar-row>
+        <div class="container">
+          <div
+            class="navbar-container"
+            fxLayout="row nowrap"
+            fxLayoutAlign="space-between center"
+          >
+            <div class="logo-container">
+              <app-navbar-logo></app-navbar-logo>
+            </div>
+
+            <div class="navbar-controls-container" fxFlex.xs="65" fxHide.lt-md>
+              <app-menu></app-menu>
+            </div>
+
+            <app-profile-menu fxHide.lt-md></app-profile-menu>
+
+            <button
+              mat-icon-button
+              fxHide.gt-sm
+              (click)="sidenav.open()"
+              aria-label="Open menu"
+            >
+              <mat-icon>menu</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <ng-content></ng-content>
+  </mat-sidenav-content>
+</mat-sidenav-container>

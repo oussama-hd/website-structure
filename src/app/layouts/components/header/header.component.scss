@@ -1,0 +1,36 @@
+.navbar {
+  box-shadow: 0 2px 6px 0 rgba(2, 51, 130, 0.16);
+  background-color: var(--blanc);
+  padding-top: 8px;
+}
+
+.navbar-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media screen and (min-width: 1280px) and (max-width: 1518px) {
+  .logo-container {
+    max-width: 12.7% !important;
+  }
+}
+
+@media screen and (max-width: 959px) {
+  .mat-toolbar-row {
+    height: 90px;
+    //padding: 0;
+    margin-bottom: 5px;
+  }
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+  padding: 40px 16px;
+}
+
+.main-btn {
+  padding: 4px 14px;
+  font-size: 16px;
+}

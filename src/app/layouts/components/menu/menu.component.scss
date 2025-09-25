@@ -1,0 +1,39 @@
+.list-horizontal {
+  display: flex;
+  flex-direction: row;
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+  height: unset !important;
+}
+
+.mat-mdc-list-item,
+.mat-mdc-list-option {
+  width: auto !important;
+}
+
+::ng-deep .mdc-list-item__primary-text {
+  display: flex;
+  gap: 4px;
+}
+
+::ng-deep .mat-mdc-menu-submenu-icon {
+  display: none;
+}
+
+.mat-mdc-menu-item {
+  display: flex;
+  flex-direction: row-reverse;
+  padding: 15px 20px;
+}
+
+.mat-mdc-menu-item .mat-icon {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+.mat-mdc-menu-item:has(.material-icons, mat-icon, [matButtonIcon]) {
+  display: flex;
+  gap: 30px;
+}

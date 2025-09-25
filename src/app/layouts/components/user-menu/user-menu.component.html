@@ -1,0 +1,37 @@
+<div class="user-menu">
+    <!-- <span style="padding: 0 20px 0 0">fr</span> -->
+    <ng-container>
+        <!-- <button mat-icon-button [matMenuTriggerFor]="userMenu" class="profile">
+        <img src="assets/images/user/profile.svg" alt="User Menu" />
+      </button> -->
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="profile">
+            <!-- <app-profile-avatar fxLayoutAlign="start center"
+                [name]="authService.currentUser().usrFirstName + ' ' + authService.currentUser().usrLastName">
+            </app-profile-avatar> -->
+        </button>
+
+        <mat-menu #userMenu="matMenu">
+            <button mat-menu-item [routerLink]="['/my']">
+                <img src="assets/images/user/setting.png" />
+
+                <span>Espace client</span>
+            </button>
+            <button mat-menu-item [routerLink]="['/my']">
+                <img src="assets/images/user/profile.png" />
+
+                <span>Gerer profile</span>
+            </button>
+
+            <button mat-menu-item (click)="logout()">
+                <img src="assets/images/user/logout.png" />
+                <span>Se déconnecter</span>
+            </button>
+        </mat-menu>
+    </ng-container>
+
+    <ng-template #loginLink>
+        <a class="main-btn rounded-30" [routerLink]="['/login']">
+            Connectez-vous
+        </a>
+    </ng-template>
+</div>

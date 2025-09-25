@@ -1,0 +1,202 @@
+$menu-bg: black;
+$menu-bg-hover: #07c;
+$menu-co: var(--primary);
+$menu-co-hover: #fff;
+$menu-bo: rgba(white, 0.1);
+$sub-menu-bg: #eee;
+$sub-menu-bg-hover: var(--blanc);
+$sub-menu-co: var(--text-description);
+$sub-menu-co-hover: black;
+$sub-menu-bo: rgba(black, 0.1);
+$menu-link-padding: 1em;
+
+/*---------------------
+HAMBURGER MENU
+----------------------*/
+
+.burger-menu {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-transition: -webkit-transform 400ms;
+  transition: -webkit-transform 400ms;
+  -o-transition: transform 400ms;
+  transition: transform 400ms;
+  transition: transform 400ms, -webkit-transform 400ms;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.hamRotate.hovered {
+  -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+
+.line {
+  fill: none;
+  -webkit-transition: stroke-dasharray 400ms, stroke-dashoffset 400ms;
+  -o-transition: stroke-dasharray 400ms, stroke-dashoffset 400ms;
+  transition: stroke-dasharray 400ms, stroke-dashoffset 400ms;
+  stroke: var(--primary);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+}
+
+.hamburger-menu .top {
+  stroke-dasharray: 40 82;
+}
+.hamburger-menu .middle {
+  stroke-dasharray: 40 111;
+}
+.hamburger-menu .bottom {
+  stroke-dasharray: 40 161;
+}
+.hamburger-menu.hovered .top {
+  stroke-dasharray: 17 82;
+  stroke-dashoffset: -62px;
+}
+.hamburger-menu.hovered .middle {
+  stroke-dashoffset: 23px;
+}
+.hamburger-menu.hovered .bottom {
+  stroke-dashoffset: -83px;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  top: 68px;
+  height: 100vh;
+  z-index: 9;
+}
+
+.mobile-menu {
+  top: 70px;
+  max-width: 250px;
+  left: -100%;
+  width: 100%;
+  padding: 0 0 30px;
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  height: auto;
+  position: fixed;
+  z-index: 9997;
+  border-radius: 19px;
+  overflow-y: auto;
+  -webkit-transform: translate3d(0, 0, 205px);
+  transform: translate3d(0, 0, 205px);
+  -webkit-transition: all 500ms ease-in-out;
+  -o-transition: all 500ms ease-in-out;
+  transition: all 500ms ease-in-out;
+}
+
+.mobile-menu.active {
+  left: 0;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transition: all 500ms ease-in-out;
+  -o-transition: all 500ms ease-in-out;
+  transition: all 500ms ease-in-out;
+}
+
+.navbar {
+  position: fixed;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin: 0 auto;
+  padding: 0 20px;
+  max-width: 1145px;
+  top: 21px;
+  left: 0;
+  right: 0;
+  height: 77px;
+  border-radius: 19px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.menu,
+.sub-menu {
+  margin: 0;
+  padding: 0 10px;
+}
+
+.menu {
+  .menu-item {
+    display: block;
+    > a {
+      padding: $menu-link-padding;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+
+      &:hover,
+      &:active,
+      &:focus {
+        .dropdown-icon:after {
+          -webkit-transform: rotate(45deg);
+              -ms-transform: rotate(45deg);
+                  transform: rotate(45deg);
+        }
+      }
+    }
+
+    &.has-children {
+      &,
+      .menu-item {
+        position: relative;
+      }
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      > .sub-menu {
+        opacity: 1;
+        height: auto;
+        width: auto;
+        visibility: visible;
+
+        .menu-item {
+          visibility: visible;
+        }
+      }
+    }
+  }
+
+  .sub-menu {
+    border-width: 1px 0 0;
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+    width: 0;
+    -webkit-transition: visibility 0.25s, opacity 0.25s ease-in-out;
+    -o-transition: visibility 0.25s, opacity 0.25s ease-in-out;
+    transition: visibility 0.25s, opacity 0.25s ease-in-out;
+
+    .menu-item {
+      visibility: hidden;
+    }
+  }
+}

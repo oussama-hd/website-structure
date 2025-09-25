@@ -1,0 +1,27 @@
+.main-btn {
+  padding: 4px 14px;
+  font-size: 16px;
+}
+
+::ng-deep .mat-mdc-menu-item-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+img {
+  width: 30px;
+  height: 30px;
+}
+
+span {
+  font-family: 'Montserrat-Medium';
+  font-size: 13px;
+  font-weight: 500;
+  font-style: normal;
+}

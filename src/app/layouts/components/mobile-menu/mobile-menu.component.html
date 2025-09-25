@@ -1,0 +1,6 @@
+<!-- app-mobile-menu.component.html -->
+<mat-nav-list>
+  <a *ngFor="let route of menus" mat-list-item [routerLink]="route.path" (click)="onNavigate()">
+    {{ route.label }}
+  </a>
+</mat-nav-list>
