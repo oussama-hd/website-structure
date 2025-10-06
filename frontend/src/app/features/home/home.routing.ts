@@ -22,4 +22,5 @@ const homePageRoutes: Routes = [
   imports: [RouterModule.forChild(homePageRoutes)],
   exports: [RouterModule]
 })
+
 export class HomePageRouting {}

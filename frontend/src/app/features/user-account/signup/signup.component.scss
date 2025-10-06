@@ -12,26 +12,39 @@
 }
 
 .login-form-section {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #fff;
+
+  .form-wrapper {
+    width: 80%;
+    max-width: 400px;
+  }
 }
 
-.form-wrapper {
-  width: 100%;
-  max-width: 850px;
-  padding: 54px 24px;
+.background-section {
+  background: url('https://images.pexels.com/photos/7735630/pexels-photo-7735630.jpeg')
+              no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed;
+}
 
-  @media (max-width: 600px) {
-    padding: 32px 16px;
+@media (max-width: 767px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .background-section {
+    display: none;
   }
 }
 
 .login-card {
   width: 100%;
   padding: 20px;
-  border-radius: 12px;
+  background: none !important;
+  box-shadow: none;
 }
 
 .login-description {
@@ -47,27 +60,6 @@
 
 .text-center {
   text-align: center !important;
-}
-
-.or-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-
-  .line {
-    flex: 1;
-    height: 1px;
-    background-color: #ccc;
-    margin: 0 10px;
-  }
-
-  .or-text {
-    color: #999;
-    font-weight: 500;
-    font-size: 14px;
-    white-space: nowrap;
-  }
 }
 
 .social-icons {
@@ -121,10 +113,17 @@
   }
 }
 
-.main-btn{
-  background: var(--primary);
-}
+.main-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.3s ease;
 
-.main-btn::after {
-  background: rgba(255, 255, 255, 0.1);
+  &:hover {
+    background: #0d47a1;
+  }
 }
