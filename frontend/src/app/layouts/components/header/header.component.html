@@ -1,17 +1,13 @@
-<mat-sidenav-container>
-  <mat-sidenav #sidenav mode="push" position="end" fxHide.gt-sm>
-    <app-mobile-menu (closeMenu)="sidenav.close()"></app-mobile-menu>
-  </mat-sidenav>
+<div class="container" fxLayout="row nowrap" fxLayoutAlign="space-between center">
+  <mat-sidenav-container>
+    <mat-sidenav #sidenav mode="push" position="end" fxHide.gt-sm>
+      <app-mobile-menu (closeMenu)="sidenav.close()"></app-mobile-menu>
+    </mat-sidenav>
 
-  <mat-sidenav-content>
-    <mat-toolbar class="navbar">
-      <mat-toolbar-row>
-        <div class="container">
-          <div
-            class="navbar-container"
-            fxLayout="row nowrap"
-            fxLayoutAlign="space-between center"
-          >
+    <mat-sidenav-content>
+      <mat-toolbar class="navbar">
+        <mat-toolbar-row>
+          <div class="navbar-container" fxLayout="row nowrap" fxLayoutAlign="space-between center">
             <div class="logo-container">
               <app-navbar-logo></app-navbar-logo>
             </div>
@@ -22,19 +18,16 @@
 
             <app-profile-menu fxHide.lt-md></app-profile-menu>
 
-            <button
-              mat-icon-button
-              fxHide.gt-sm
-              (click)="sidenav.open()"
-              aria-label="Open menu"
-            >
+            <button mat-icon-button fxHide.gt-sm (click)="sidenav.open()" aria-label="Open menu">
               <mat-icon>menu</mat-icon>
             </button>
           </div>
-        </div>
-      </mat-toolbar-row>
-    </mat-toolbar>
-
-    <ng-content></ng-content>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+        </mat-toolbar-row>
+      </mat-toolbar>
+      <ng-content></ng-content>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  <a class="main-btn rounded-30" [routerLink]="['/login']">
+    Connectez-vous
+  </a>
+</div>

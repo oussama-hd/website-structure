@@ -1,0 +1,106 @@
+<div class="form-group mb-2" *ngIf="field.type !== 'API'">
+  <ng-container *ngIf="type !== 'B'; else booleanField">
+
+    <!-- Année -->
+    <div *ngIf="type === 'Y'" class="w-100">
+      <app-single-year-picker [formControl]="control"></app-single-year-picker>
+      <mat-error *ngIf="submitted && control?.errors">
+        <div *ngIf="control?.errors?.['required']">{{ label }} is required</div>
+      </mat-error>
+    </div>
+
+    <!-- Switch -->
+    <div *ngIf="type === 'S'">
+      <mat-label>{{ label }}</mat-label>
+      <mat-slide-toggle (change)="onToggleChange($event)">
+        {{ control.value === 1 ? 'Oui' : 'Non' }}
+      </mat-slide-toggle>
+    </div>
+
+    <!-- mat-form-field pour les types normaux sauf TT -->
+    <mat-form-field *ngIf="type !== 'Y' && type !== 'TT' && type !== 'S'" appearance="outline" class="w-100">
+      <mat-label>{{ label }}</mat-label>
+
+      <ng-container [ngSwitch]="type">
+
+        <!-- Currency -->
+        <input *ngSwitchCase="'V'" matInput type="text" [formControl]="control" [placeholder]="placeholder || label"
+          [ngClass]="{ 'is-invalid': submitted && control?.errors }" [value]="control?.value | number:'1.0-0'"
+          (input)="onCurrencyInput($event)" />
+
+        <!-- Email -->
+        <!-- <input *ngSwitchCase="'R'" matInput [type]="field.options[0]?.value ? 'email' : 'text'" [formControl]="control"
+          [placeholder]="placeholder || label" [ngClass]="{ 'is-invalid': submitted && control?.errors }" /> -->
+
+
+        <!-- Date -->
+        <ng-container *ngSwitchCase="'D'">
+          <input matInput [matDatepicker]="picker" [formControl]="control" (dateChange)="onDateChange($event)"
+            [placeholder]="placeholder || label">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </ng-container>
+
+        <!-- Autocomplete -->
+        <ng-container *ngSwitchCase="'L'">
+          <input type="text" matInput [formControl]="control" [placeholder]="placeholder || label"
+            [matAutocomplete]="auto" (input)="valueChanged.emit(control.value)" />
+
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn.bind(this)">
+            <mat-option *ngFor="let option of filteredOptions | async" [value]="option.value" (onSelectionChange)="
+              $event.isUserInput && valueChanged.emit(option.value)">
+              {{ option.label }}
+            </mat-option>
+          </mat-autocomplete>
+        </ng-container>
+
+            <!-- Autocomplete -->
+            <ng-container *ngSwitchCase="'P'">
+
+        <input matInput [type]="hidePassword ? 'password' : 'text'" [formControl]="control"
+          [placeholder]="placeholder || label" [ngClass]="{ 'is-invalid': submitted && control?.errors }" />
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Toggle password visibility'" type="button">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </ng-container>
+
+        <!-- Champ par défaut -->
+        <input *ngSwitchDefault matInput [type]="type" [formControl]="control" [placeholder]="placeholder || label"
+          [ngClass]="{ 'is-invalid': submitted && control?.errors }" />
+      </ng-container>
+
+      <mat-error *ngIf="submitted && control?.errors">
+        <div *ngIf="control?.errors?.['required']">{{ label }} est requis</div>
+        <div *ngIf="control?.errors?.['pattern']">
+          {{ getPatternLabel(field) }}
+        </div>
+      </mat-error>
+
+    </mat-form-field>
+
+    <!-- mat-button-toggle pour type TT (en dehors de mat-form-field) -->
+    <div *ngIf="type === 'TT'" class="w-100">
+      <label>{{ label }}</label>
+      <mat-button-toggle-group [formControl]="control" name="fontStyle" aria-label="Font Style">
+        <mat-button-toggle *ngFor="let option of field.options" [value]="option.value">
+          {{ option.label }}
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-error *ngIf="submitted && control?.errors">
+        <div *ngIf="control?.errors?.['required']">{{ label }} est requis</div>
+      </mat-error>
+    </div>
+  </ng-container>
+
+  <!-- Boolean -->
+  <ng-template #booleanField>
+    <mat-checkbox [formControl]="control" (change)="onCheckboxChange($event)">
+      {{ label }}
+    </mat-checkbox>
+    <mat-error *ngIf="submitted && control?.errors">
+      <div *ngIf="control?.errors?.['required']">{{ label }} is required</div>
+    </mat-error>
+  </ng-template>
+</div>

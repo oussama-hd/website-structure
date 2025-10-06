@@ -8,7 +8,14 @@ const homePageRoutes: Routes = [
     path: '',
     component: HomeComponent,
     data: { title: 'SportAcademy - Accueil' }
-  }
+  },
+  // {
+  //   path: 'user-account',
+  //   loadChildren: () =>
+  //     import('../user-account/user-account.module').then(
+  //       (m) => m.UserAccountModule
+  //     ),
+  // }
 ];
 
 @NgModule({

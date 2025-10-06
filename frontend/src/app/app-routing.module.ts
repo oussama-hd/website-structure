@@ -13,13 +13,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./features/home/home.module').then((m) => m.HomePageModule),
       },
-      // {
-      //   path: 'user-account',
-      //   loadChildren: () =>
-      //     import('./features/user-account/user-account.module').then(
-      //       (m) => m.UserAccountModule
-      //     ),
-      // }
+      {
+        path: 'user-account',
+        loadChildren: () =>
+          import('./features/user-account/user-account.module').then(
+            (m) => m.UserAccountModule
+          )
+      }
     ]
   },
   { path: '**', redirectTo: '' },
