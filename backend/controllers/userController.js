@@ -1,24 +1,93 @@
-const { getUsers, createUser } = require("../models/userModel");
+const oracledb = require("oracledb");
+require("dotenv").config();
+
+try {
+  oracledb.initOracleClient({
+    libDir: process.platform === "win32"
+      ? "C:\\oracle\\instantclient_19_28"
+      : "/opt/oracle/instantclient_19_28"
+  });
+} catch (err) {
+  console.error("initOracleClient error:", err);
+}
+
+async function getConnection() {
+  return await oracledb.getConnection({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    connectString: process.env.DB_CONNECT_STRING,
+  });
+}
 
 exports.getAllUsers = async (req, res) => {
+  let conn;
   try {
-    const users = await getUsers();
-    res.json(users);
+    conn = await getConnection();
+    const result = await conn.execute(
+      `SELECT * FROM BI_AGA.USERS`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    await conn.close();
+    return res.json(result.rows); 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Erreur serveur" });
+    if (conn) {
+      try { await conn.close(); } catch (e) { console.error("Close error:", e); }
+    }
+    return res.status(500).json({ error: err.message });
   }
 };
 
-exports.addUser = async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    if (!name || !email) return res.status(400).json({ message: "Champs requis" });
+exports.addAgency = async (req, res) => {
+  const {
+    AUS_FIRSTNAME,
+    AUS_LASTNAME,
+    AUS_PHONE,
+    AUS_SEXE,
+    AUS_ADDRESS,
+    AUS_EMAIL,
+    AUS_AGE,
+    AUS_BIRTHDATE,
+  } = req.body;
 
-    await createUser({ name, email });
-    res.status(201).json({ message: "Utilisateur ajouté" });
+  try {
+    const conn = await getConnection();
+
+    await conn.execute(
+      `
+      INSERT INTO BI_AGA.AGENCY (
+        AUS_ID,
+        AUS_FIRSTNAME,
+        AUS_LASTNAME,
+        AUS_PHONE,
+        AUS_SEXE,
+        AUS_ADDRESS,
+        AUS_EMAIL,
+        AUS_AGE,
+        AUS_BIRTHDATE,
+        CREATED_AT
+      ) VALUES (
+        BI_AGA.AGENCY_SEQ.NEXTVAL,
+        :AUS_FIRSTNAME,
+        :AUS_LASTNAME,
+        :AUS_PHONE,
+        :AUS_SEXE,
+        :AUS_ADDRESS,
+        :AUS_EMAIL,
+        :AUS_AGE,
+        TO_DATE(:AUS_BIRTHDATE, 'YYYY-MM-DD'),
+        SYSDATE
+      ) `,
+      { AUS_FIRSTNAME, AUS_LASTNAME, AUS_PHONE, AUS_SEXE, AUS_ADDRESS, AUS_EMAIL, AUS_AGE, AUS_BIRTHDATE },
+      { autoCommit: true }
+    );
+    
+
+    res.status(201).json({ message: "Agency added successfully" });
+    await conn.close();
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("❌ Error adding user:", err);
+    res.status(500).json({ error: err.message });
   }
 };
