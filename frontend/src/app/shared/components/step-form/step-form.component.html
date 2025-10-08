@@ -1,0 +1,13 @@
+<h3>{{ stepTitle }}</h3>
+
+<div fxLayout="row wrap" fxLayoutGap="20px">
+  <div *ngFor="let field of fields" fxFlex="45" fxFlex.xs="100">
+    <app-generique-input
+      [label]="field.label"
+      [placeholder]="field.label"
+      [field]="field"
+      [formGroup]="formGroup"
+      [control]="getFormControl(field.code)">
+    </app-generique-input>
+  </div>
+</div>

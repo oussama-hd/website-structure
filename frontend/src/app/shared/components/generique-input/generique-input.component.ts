@@ -13,7 +13,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
   selector: 'app-generique-input',
   standalone: false,
   templateUrl: './generique-input.component.html',
-  styleUrl: './generique-input.component.css',
+  styleUrl: './generique-input.component.scss',
  
 })
 export class GeneriqueInputComponent implements OnInit {
@@ -36,6 +36,16 @@ export class GeneriqueInputComponent implements OnInit {
 	preferredCountries: CountryISO[] = [CountryISO.Algeria];
 
   type: string = 'V';
+
+  selectedFileName: string | null = null;
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFileName = file.name;
+      this.control.setValue(file); 
+    }
+  }
 
 	changePreferredCountries() {
 		this.preferredCountries = [CountryISO.Algeria];
@@ -107,6 +117,8 @@ export class GeneriqueInputComponent implements OnInit {
       case 'TT': return 'TT';     // group toggle 
       case 'S': return 'S';       // Switch toggle
       case 'P': return 'P';       // Password
+      case 'F': return 'F';       // upload-file
+      case 'TTA': return 'TTA';   // textArea
       default: return 'T';        // Text 
     }
   }

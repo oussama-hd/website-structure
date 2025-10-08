@@ -9,6 +9,32 @@
       </mat-error>
     </div>
 
+    <!-- Upload de fichier -->
+    <div *ngIf="type === 'F'" class="w-100">
+      <div class="file-upload-container">
+        <label class="custom-label d-block mb-2">
+          {{ label }}
+          <small class="text-muted ms-1" *ngIf="!field.obligatoire">(Facultatif)</small>
+        </label>
+
+        <input
+          type="file"
+          class="file-input"
+          [attr.accept]="'*'"
+          (change)="onFileSelected($event)"
+        />
+
+        <!-- Afficher le nom du fichier sélectionné -->
+        <div *ngIf="selectedFileName" class="mt-2 text-sm text-muted">
+          📎 {{ selectedFileName }}
+        </div>
+
+        <mat-error *ngIf="submitted && control?.errors">
+          <div *ngIf="control?.errors?.['required']">{{ label }} est requis</div>
+        </mat-error>
+      </div>
+    </div>
+
     <!-- Switch -->
     <div *ngIf="type === 'S'">
       <mat-label>{{ label }}</mat-label>
@@ -17,8 +43,32 @@
       </mat-slide-toggle>
     </div>
 
+
+        <!-- TextArea -->
+    <div *ngIf="type === 'TTA'" class="w-100 text-area-block">
+      <label class="custom-label d-block mb-1">
+        {{ label }}
+        <small class="text-muted ms-1">(Facultatif)</small>
+      </label>
+    
+      <textarea
+        matInput
+        rows="5"
+        [formControl]="control"
+        [placeholder]="placeholder || label"
+        class="custom-textarea w-100"
+        [ngClass]="{ 'is-invalid': submitted && control?.errors }"
+      ></textarea>
+    
+      <mat-error *ngIf="submitted && control?.errors">
+        <div *ngIf="control?.errors?.['required']">{{ label }} est requis</div>
+      </mat-error>
+    </div>
+    
+
+
     <!-- mat-form-field pour les types normaux sauf TT -->
-    <mat-form-field *ngIf="type !== 'Y' && type !== 'TT' && type !== 'S'" appearance="outline" class="w-100">
+    <mat-form-field *ngIf="type !== 'Y' && type !== 'TT' && type !== 'S' && type !== 'TTA' && type !=='F'"  appearance="outline" class="w-100">
       <mat-label>{{ label }}</mat-label>
 
       <ng-container [ngSwitch]="type">
@@ -31,7 +81,6 @@
         <!-- Email -->
         <!-- <input *ngSwitchCase="'R'" matInput [type]="field.options[0]?.value ? 'email' : 'text'" [formControl]="control"
           [placeholder]="placeholder || label" [ngClass]="{ 'is-invalid': submitted && control?.errors }" /> -->
-
 
         <!-- Date -->
         <ng-container *ngSwitchCase="'D'">
@@ -54,7 +103,7 @@
           </mat-autocomplete>
         </ng-container>
 
-            <!-- Autocomplete -->
+            <!-- Password -->
             <ng-container *ngSwitchCase="'P'">
 
         <input matInput [type]="hidePassword ? 'password' : 'text'" [formControl]="control"
@@ -76,10 +125,11 @@
           {{ getPatternLabel(field) }}
         </div>
       </mat-error>
-
     </mat-form-field>
 
-    <!-- mat-button-toggle pour type TT (en dehors de mat-form-field) -->
+
+    
+    
     <div *ngIf="type === 'TT'" class="w-100">
       <label>{{ label }}</label>
       <mat-button-toggle-group [formControl]="control" name="fontStyle" aria-label="Font Style">
