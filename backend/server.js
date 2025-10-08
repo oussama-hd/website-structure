@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors"); 
+const path = require("path");
 
 require("dotenv").config();
 const swaggerJsdoc = require("swagger-jsdoc");
@@ -11,6 +12,8 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 app.use(cors());
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 5000;
 

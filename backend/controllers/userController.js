@@ -1,6 +1,8 @@
 const oracledb = require("oracledb");
 require("dotenv").config();
 
+const path = require("path");
+
 try {
   oracledb.initOracleClient({
     libDir: process.platform === "win32"
@@ -19,166 +21,77 @@ async function getConnection() {
   });
 }
 
-exports.getAllUsers = async (req, res) => {
-  let conn;
-  try {
-    conn = await getConnection();
-    const result = await conn.execute(
-      `SELECT * FROM BI_AGA.USERS`,
-      [],
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
 
-    await conn.close();
-    return res.json(result.rows); 
-  } catch (err) {
-    if (conn) {
-      try { await conn.close(); } catch (e) { console.error("Close error:", e); }
-    }
-    return res.status(500).json({ error: err.message });
-  }
+// Helper pour parser un nombre (retourne 0 si NaN / vide)
+const parseNumber = (v) => {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : 0;
 };
 
 
-//   const {
-//     AUS_FIRSTNAME,
-//     AUS_LASTNAME,
-//     AUS_PHONE,
-//     AUS_SEXE,
-//     AUS_ADDRESS,
-//     AUS_EMAIL,
-//     AUS_AGE,
-//     AUS_BIRTHDATE,
-//   } = req.body;
-
-//   try {
-//     const conn = await getConnection();
-
-//     await conn.execute(
-//       `
-//       INSERT INTO BI_AGA.AGENCY (
-//         AUS_ID,
-//         AUS_FIRSTNAME,
-//         AUS_LASTNAME,
-//         AUS_PHONE,
-//         AUS_SEXE,
-//         AUS_ADDRESS,
-//         AUS_EMAIL,
-//         AUS_AGE,
-//         AUS_BIRTHDATE,
-//         CREATED_AT
-//       ) VALUES (
-//         BI_AGA.AGENCY_SEQ.NEXTVAL,
-//         :AUS_FIRSTNAME,
-//         :AUS_LASTNAME,
-//         :AUS_PHONE,
-//         :AUS_SEXE,
-//         :AUS_ADDRESS,
-//         :AUS_EMAIL,
-//         :AUS_AGE,
-//         TO_DATE(:AUS_BIRTHDATE, 'YYYY-MM-DD'),
-//         SYSDATE
-//       ) `,
-//       { AUS_FIRSTNAME, AUS_LASTNAME, AUS_PHONE, AUS_SEXE, AUS_ADDRESS, AUS_EMAIL, AUS_AGE, AUS_BIRTHDATE },
-//       { autoCommit: true }
-//     );
-    
-
-//     res.status(201).json({ message: "Agency added successfully" });
-//     await conn.close();
-//   } catch (err) {
-//     console.error("❌ Error adding user:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-
-// ********************************************************************************************
-// // *****************************************************************************************
-// ============================================
-// FILE: controllers/agencyController.js
-// ============================================
-
-/**
- * Ajouter une nouvelle demande d'agence
- */
 exports.addAgency = async (req, res) => {
-  const {
-    // Informations personnelles
-    AUS_FIRSTNAME,
-    AUS_LASTNAME,
-    AUS_PHONE,
-    AUS_SEXE,
-    AUS_ADDRESS,
-    AUS_EMAIL,
-    AUS_AGE,
-    AUS_BIRTHDATE,
-    
-    // Expériences professionnelles
-    AUS_EDUCATION_LEVEL,
-    AUS_INSURANCE_EXPERIENCE,
-    AUS_DIPLOMAS,
-    AUS_CERTIFICATES,
-    
-    // Informations sur l'agence
-    AUS_HAS_LOCATION,
-    AUS_LOCATION_STATUS,
-    AUS_WILAYA,
-    AUS_COMMUNE,
-    AUS_EXACT_ADDRESS,
-    
-    // Questionnaire
-    AUS_MOTIVATION,
-    AUS_REASON_CHOICE,
-    AUS_ROADMAP,
-    AUS_RECRUITMENT_COUNT,
-    AUS_ESTIMATED_REVENUE,
-    
-    // Business Plan - Année 1
-    AUS_BP_Y1_AUTO,
-    AUS_BP_Y1_SIMPLE_RISKS,
-    AUS_BP_Y1_FLEETS,
-    AUS_BP_Y1_MULTIRISKS,
-    
-    // Business Plan - Année 2
-    AUS_BP_Y2_AUTO,
-    AUS_BP_Y2_SIMPLE_RISKS,
-    AUS_BP_Y2_FLEETS,
-    AUS_BP_Y2_MULTIRISKS,
-    
-    // Business Plan - Année 3
-    AUS_BP_Y3_AUTO,
-    AUS_BP_Y3_SIMPLE_RISKS,
-    AUS_BP_Y3_FLEETS,
-    AUS_BP_Y3_MULTIRISKS
-  } = req.body;
+  const body = req.body || {};
+  const files = req.files || {};
+
+  // Validate required fields (simple validation)
+  const required = [
+    "AUS_FIRSTNAME",
+    "AUS_LASTNAME",
+    "AUS_PHONE",
+    "AUS_SEXE",
+    "AUS_ADDRESS",
+    "AUS_EMAIL",
+    "AUS_BIRTHDATE",
+    "AUS_EDUCATION_LEVEL",
+    "AUS_INSURANCE_EXPERIENCE",
+    "AUS_HAS_LOCATION",
+    "AUS_WILAYA",
+    "AUS_COMMUNE",
+    "AUS_MOTIVATION",
+    "AUS_REASON_CHOICE",
+    "AUS_ROADMAP"
+  ];
+  const missing = required.filter((k) => !(k in body) || body[k] === "");
+  if (missing.length) {
+    return res.status(400).json({
+      success: false,
+      error: `Paramètres manquants: ${missing.join(", ")}`
+    });
+  }
+
+  const diplomasPaths = Array.isArray(files.AUS_DIPLOMAS)
+  ? files.AUS_DIPLOMAS.map(f => `/uploads/${f.filename}`)
+  : [];
+
+const certificatesPaths = Array.isArray(files.AUS_CERTIFICATES)
+  ? files.AUS_CERTIFICATES.map(f => `/uploads/${f.filename}`)
+  : [];
+
+  // Calculs business plan (années 1/2/3)
+  const totalY1 =
+    parseNumber(body.AUS_BP_Y1_AUTO) +
+    parseNumber(body.AUS_BP_Y1_SIMPLE_RISKS) +
+    parseNumber(body.AUS_BP_Y1_FLEETS) +
+    parseNumber(body.AUS_BP_Y1_MULTIRISKS);
+
+  const totalY2 =
+    parseNumber(body.AUS_BP_Y2_AUTO) +
+    parseNumber(body.AUS_BP_Y2_SIMPLE_RISKS) +
+    parseNumber(body.AUS_BP_Y2_FLEETS) +
+    parseNumber(body.AUS_BP_Y2_MULTIRISKS);
+
+  const totalY3 =
+    parseNumber(body.AUS_BP_Y3_AUTO) +
+    parseNumber(body.AUS_BP_Y3_SIMPLE_RISKS) +
+    parseNumber(body.AUS_BP_Y3_FLEETS) +
+    parseNumber(body.AUS_BP_Y3_MULTIRISKS);
 
   let conn;
-
   try {
     conn = await getConnection();
 
-    const totalY1 = (parseFloat(AUS_BP_Y1_AUTO) || 0) + 
-                    (parseFloat(AUS_BP_Y1_SIMPLE_RISKS) || 0) + 
-                    (parseFloat(AUS_BP_Y1_FLEETS) || 0) + 
-                    (parseFloat(AUS_BP_Y1_MULTIRISKS) || 0);
-                    
-    const totalY2 = (parseFloat(AUS_BP_Y2_AUTO) || 0) + 
-                    (parseFloat(AUS_BP_Y2_SIMPLE_RISKS) || 0) + 
-                    (parseFloat(AUS_BP_Y2_FLEETS) || 0) + 
-                    (parseFloat(AUS_BP_Y2_MULTIRISKS) || 0);
-                    
-    const totalY3 = (parseFloat(AUS_BP_Y3_AUTO) || 0) + 
-                    (parseFloat(AUS_BP_Y3_SIMPLE_RISKS) || 0) + 
-                    (parseFloat(AUS_BP_Y3_FLEETS) || 0) + 
-                    (parseFloat(AUS_BP_Y3_MULTIRISKS) || 0);
-
-    // Convertir les arrays en JSON string si nécessaire
-    const diplomasJson = Array.isArray(AUS_DIPLOMAS) ? JSON.stringify(AUS_DIPLOMAS) : AUS_DIPLOMAS;
-    const certificatesJson = Array.isArray(AUS_CERTIFICATES) ? JSON.stringify(AUS_CERTIFICATES) : AUS_CERTIFICATES;
-
-    const result = await conn.execute(
-      `INSERT INTO BI_AGA.AGENCY (
+    const sql = `
+      INSERT INTO BI_AGA.AGENCY (
         AUS_ID,
         AUS_FIRSTNAME,
         AUS_LASTNAME,
@@ -220,8 +133,7 @@ exports.addAgency = async (req, res) => {
         AUS_STATUS,
         CREATED_AT,
         UPDATED_AT
-      )
-      VALUES (
+      ) VALUES (
         BI_AGA.AGENCY_SEQ.NEXTVAL,
         :AUS_FIRSTNAME,
         :AUS_LASTNAME,
@@ -230,7 +142,8 @@ exports.addAgency = async (req, res) => {
         :AUS_ADDRESS,
         :AUS_EMAIL,
         :AUS_AGE,
-        TO_DATE(:AUS_BIRTHDATE, 'YYYY-MM-DD'),
+        -- si AUS_BIRTHDATE vide, on passe NULL
+        CASE WHEN :AUS_BIRTHDATE IS NOT NULL AND :AUS_BIRTHDATE <> '' THEN TO_DATE(:AUS_BIRTHDATE, 'YYYY-MM-DD') ELSE NULL END,
         :AUS_EDUCATION_LEVEL,
         :AUS_INSURANCE_EXPERIENCE,
         :AUS_DIPLOMAS,
@@ -264,8 +177,106 @@ exports.addAgency = async (req, res) => {
         SYSDATE,
         SYSDATE
       )
-      RETURNING AUS_ID INTO :id`,
-      {
+      RETURNING AUS_ID INTO :id
+    `;
+
+    // Prepare binds: on étend body mais on s'assure d'inclure les totaux et conversions nécessaires
+    const binds = {
+      AUS_FIRSTNAME: body.AUS_FIRSTNAME,
+      AUS_LASTNAME: body.AUS_LASTNAME,
+      AUS_PHONE: body.AUS_PHONE,
+      AUS_SEXE: body.AUS_SEXE,
+      AUS_ADDRESS: body.AUS_ADDRESS,
+      AUS_EMAIL: body.AUS_EMAIL,
+      AUS_AGE: body.AUS_AGE ? parseInt(body.AUS_AGE, 10) : null,
+      AUS_BIRTHDATE: body.AUS_BIRTHDATE || null,
+      AUS_EDUCATION_LEVEL: body.AUS_EDUCATION_LEVEL,
+      AUS_INSURANCE_EXPERIENCE: body.AUS_INSURANCE_EXPERIENCE,
+      AUS_DIPLOMAS: JSON.stringify(diplomasPaths),
+      AUS_CERTIFICATES: JSON.stringify(certificatesPaths),
+      AUS_HAS_LOCATION: body.AUS_HAS_LOCATION === "true" || body.AUS_HAS_LOCATION === true ? 1 : 0,
+      AUS_LOCATION_STATUS: body.AUS_LOCATION_STATUS || null,
+      AUS_WILAYA: body.AUS_WILAYA,
+      AUS_COMMUNE: body.AUS_COMMUNE,
+      AUS_EXACT_ADDRESS: body.AUS_EXACT_ADDRESS || null,
+      AUS_MOTIVATION: body.AUS_MOTIVATION,
+      AUS_REASON_CHOICE: body.AUS_REASON_CHOICE,
+      AUS_ROADMAP: body.AUS_ROADMAP,
+      AUS_RECRUITMENT_COUNT: body.AUS_RECRUITMENT_COUNT ? parseInt(body.AUS_RECRUITMENT_COUNT, 10) : null,
+      AUS_ESTIMATED_REVENUE: body.AUS_ESTIMATED_REVENUE ? parseFloat(body.AUS_ESTIMATED_REVENUE) : null,
+
+      AUS_BP_Y1_AUTO: body.AUS_BP_Y1_AUTO ? parseNumber(body.AUS_BP_Y1_AUTO) : null,
+      AUS_BP_Y1_SIMPLE_RISKS: body.AUS_BP_Y1_SIMPLE_RISKS ? parseNumber(body.AUS_BP_Y1_SIMPLE_RISKS) : null,
+      AUS_BP_Y1_FLEETS: body.AUS_BP_Y1_FLEETS ? parseNumber(body.AUS_BP_Y1_FLEETS) : null,
+      AUS_BP_Y1_MULTIRISKS: body.AUS_BP_Y1_MULTIRISKS ? parseNumber(body.AUS_BP_Y1_MULTIRISKS) : null,
+      AUS_BP_Y1_TOTAL: totalY1,
+
+      AUS_BP_Y2_AUTO: body.AUS_BP_Y2_AUTO ? parseNumber(body.AUS_BP_Y2_AUTO) : null,
+      AUS_BP_Y2_SIMPLE_RISKS: body.AUS_BP_Y2_SIMPLE_RISKS ? parseNumber(body.AUS_BP_Y2_SIMPLE_RISKS) : null,
+      AUS_BP_Y2_FLEETS: body.AUS_BP_Y2_FLEETS ? parseNumber(body.AUS_BP_Y2_FLEETS) : null,
+      AUS_BP_Y2_MULTIRISKS: body.AUS_BP_Y2_MULTIRISKS ? parseNumber(body.AUS_BP_Y2_MULTIRISKS) : null,
+      AUS_BP_Y2_TOTAL: totalY2,
+
+      AUS_BP_Y3_AUTO: body.AUS_BP_Y3_AUTO ? parseNumber(body.AUS_BP_Y3_AUTO) : null,
+      AUS_BP_Y3_SIMPLE_RISKS: body.AUS_BP_Y3_SIMPLE_RISKS ? parseNumber(body.AUS_BP_Y3_SIMPLE_RISKS) : null,
+      AUS_BP_Y3_FLEETS: body.AUS_BP_Y3_FLEETS ? parseNumber(body.AUS_BP_Y3_FLEETS) : null,
+      AUS_BP_Y3_MULTIRISKS: body.AUS_BP_Y3_MULTIRISKS ? parseNumber(body.AUS_BP_Y3_MULTIRISKS) : null,
+      AUS_BP_Y3_TOTAL: totalY3,
+
+      // out bind pour récupérer l'ID inséré
+      id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    };
+
+    const options = { autoCommit: true };
+
+    const result = await conn.execute(sql, binds, options);
+
+    const newId = result.outBinds && result.outBinds.id && result.outBinds.id[0]
+      ? result.outBinds.id[0]
+      : null;
+
+    if (!newId) {
+      throw new Error("Impossible de récupérer l'ID créé");
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Demande d'agence ajoutée avec succès",
+      data: {
+        id: newId,
+        reference: `AA-${String(newId).padStart(6, "0")}`,
+        diplomas: diplomasPaths,
+        certificates: certificatesPaths
+      }
+    });
+  } catch (err) {
+    console.error("❌ Error adding agency:", err);
+    // Si Oracle renvoie un texte d'erreur plus explicite, le renvoyer : err.message
+    res.status(500).json({ success: false, error: err.message || "Internal server error" });
+  } finally {
+    if (conn) try { await conn.close(); } catch (e) { /* ignore */ }
+  }
+};
+
+exports.getAllAgencies = async (req, res) => {
+  let conn;
+
+  // 🔹 Fonction utilitaire pour parser les champs JSON stockés en texte
+  function parseJsonSafe(value) {
+    try {
+      return value ? JSON.parse(value) : [];
+    } catch (e) {
+      console.error("Erreur parse JSON:", e.message);
+      return [];
+    }
+  }
+
+  try {
+    conn = await getConnection();
+
+    const sql = `
+      SELECT 
+        AUS_ID,
         AUS_FIRSTNAME,
         AUS_LASTNAME,
         AUS_PHONE,
@@ -273,164 +284,73 @@ exports.addAgency = async (req, res) => {
         AUS_ADDRESS,
         AUS_EMAIL,
         AUS_AGE,
-        AUS_BIRTHDATE,
+        TO_CHAR(AUS_BIRTHDATE, 'YYYY-MM-DD') AS AUS_BIRTHDATE,
         AUS_EDUCATION_LEVEL,
         AUS_INSURANCE_EXPERIENCE,
-        AUS_DIPLOMAS: diplomasJson,
-        AUS_CERTIFICATES: certificatesJson,
-        AUS_HAS_LOCATION: AUS_HAS_LOCATION ? 1 : 0,
+        AUS_DIPLOMAS,
+        AUS_CERTIFICATES,
+        AUS_HAS_LOCATION,
         AUS_LOCATION_STATUS,
         AUS_WILAYA,
         AUS_COMMUNE,
         AUS_EXACT_ADDRESS,
-        AUS_MOTIVATION,
-        AUS_REASON_CHOICE,
-        AUS_ROADMAP,
+
         AUS_RECRUITMENT_COUNT,
         AUS_ESTIMATED_REVENUE,
-        AUS_BP_Y1_AUTO: AUS_BP_Y1_AUTO || 0,
-        AUS_BP_Y1_SIMPLE_RISKS: AUS_BP_Y1_SIMPLE_RISKS || 0,
-        AUS_BP_Y1_FLEETS: AUS_BP_Y1_FLEETS || 0,
-        AUS_BP_Y1_MULTIRISKS: AUS_BP_Y1_MULTIRISKS || 0,
-        AUS_BP_Y1_TOTAL: totalY1,
-        AUS_BP_Y2_AUTO: AUS_BP_Y2_AUTO || 0,
-        AUS_BP_Y2_SIMPLE_RISKS: AUS_BP_Y2_SIMPLE_RISKS || 0,
-        AUS_BP_Y2_FLEETS: AUS_BP_Y2_FLEETS || 0,
-        AUS_BP_Y2_MULTIRISKS: AUS_BP_Y2_MULTIRISKS || 0,
-        AUS_BP_Y2_TOTAL: totalY2,
-        AUS_BP_Y3_AUTO: AUS_BP_Y3_AUTO || 0,
-        AUS_BP_Y3_SIMPLE_RISKS: AUS_BP_Y3_SIMPLE_RISKS || 0,
-        AUS_BP_Y3_FLEETS: AUS_BP_Y3_FLEETS || 0,
-        AUS_BP_Y3_MULTIRISKS: AUS_BP_Y3_MULTIRISKS || 0,
-        AUS_BP_Y3_TOTAL: totalY3,
-        id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
-      },
-      { autoCommit: true }
-    );
-    
-    
-
-    const newId = result.outBinds.id[0];
-
-    res.status(201).json({ 
-      success: true,
-      message: "Demande d'agence ajoutée avec succès",
-      data: {
-        id: newId,
-        reference: `AA-${newId.toString().padStart(6, '0')}`
-      }
-    });
-
-  } catch (err) {
-    console.error("❌ Error adding agency:", err);
-    res.status(500).json({ 
-      success: false,
-      error: err.message 
-    });
-  } finally {
-    if (conn) {
-      try {
-        await conn.close();
-      } catch (err) {
-        console.error("❌ Error closing connection:", err);
-      }
-    }
-  }
-};
-
-// const oracledb = require('oracledb');
-// const getConnection = require('../config/database');
-
-/**
- * Récupérer toutes les demandes d'agence
- * 
- */
-exports.getAllAgencies = async (req, res) => {
-  const { status, wilaya, page = 1, limit = 10 } = req.query;
-  
-  let conn;
-  
-  try {
-    conn = await getConnection();
-    
-    // Construire la requête avec filtres
-    let whereClause = '';
-    const binds = {};
-    
-    if (status) {
-      whereClause += ' AND AUS_STATUS = :status';
-      binds.status = status;
-    }
-    
-    if (wilaya) {
-      whereClause += ' AND AUS_WILAYA = :wilaya';
-      binds.wilaya = wilaya;
-    }
-    
-    // Pagination
-    const offset = (page - 1) * limit;
-    binds.limit = parseInt(limit);
-    binds.offset = parseInt(offset);
-    
-    const query = `
-      SELECT * FROM (
-        SELECT a.*, ROWNUM rnum FROM (
-          SELECT 
-            AUS_ID,
-            AUS_FIRSTNAME,
-            AUS_LASTNAME,
-            AUS_PHONE,
-            AUS_EMAIL,
-            AUS_WILAYA,
-            AUS_COMMUNE,
-            AUS_STATUS,
-            TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') as CREATED_AT,
-            TO_CHAR(UPDATED_AT, 'YYYY-MM-DD HH24:MI:SS') as UPDATED_AT
-          FROM BI_AGA.AGENCY
-          WHERE 1=1 ${whereClause}
-          ORDER BY CREATED_AT DESC
-        ) a WHERE ROWNUM <= :limit + :offset
-      ) WHERE rnum > :offset
+        AUS_BP_Y1_AUTO,
+        AUS_BP_Y1_SIMPLE_RISKS,
+        AUS_BP_Y1_FLEETS,
+        AUS_BP_Y1_MULTIRISKS,
+        AUS_BP_Y1_TOTAL,
+        AUS_BP_Y2_AUTO,
+        AUS_BP_Y2_SIMPLE_RISKS,
+        AUS_BP_Y2_FLEETS,
+        AUS_BP_Y2_MULTIRISKS,
+        AUS_BP_Y2_TOTAL,
+        AUS_BP_Y3_AUTO,
+        AUS_BP_Y3_SIMPLE_RISKS,
+        AUS_BP_Y3_FLEETS,
+        AUS_BP_Y3_MULTIRISKS,
+        AUS_BP_Y3_TOTAL,
+        AUS_STATUS,
+        TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS CREATED_AT,
+        TO_CHAR(UPDATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS UPDATED_AT
+      FROM BI_AGA.AGENCY
+      ORDER BY CREATED_AT DESC
     `;
-    
-    const result = await conn.execute(query, binds, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    
-    // Compter le total
-    const countQuery = `
-      SELECT COUNT(*) as TOTAL 
-      FROM BI_AGA.AGENCY 
-      WHERE 1=1 ${whereClause}
-    `;
-    const countResult = await conn.execute(countQuery, binds, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    const total = countResult.rows[0].TOTAL;
-    
+
+    const result = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+    const BASE_URL = `${req.protocol}://${req.get("host")}`;
+
+    const data = result.rows.map(row => ({
+      ...row,
+      AUS_DIPLOMAS: parseJsonSafe(row.AUS_DIPLOMAS).map(p => `${BASE_URL}${p}`),
+      AUS_CERTIFICATES: parseJsonSafe(row.AUS_CERTIFICATES).map(p => `${BASE_URL}${p}`),
+      reference: `AA-${String(row.AUS_ID).padStart(6, "0")}`
+    }));
+
     res.status(200).json({
       success: true,
-      data: result.rows,
-      pagination: {
-        total: total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit)
-      }
+      count: data.length,
+      data
     });
-    
   } catch (err) {
     console.error("❌ Error fetching agencies:", err);
-    res.status(500).json({ 
-      success: false,
-      error: err.message 
-    });
+    res.status(500).json({ success: false, error: err.message || "Internal server error" });
   } finally {
-    if (conn) {
-      try {
-        await conn.close();
-      } catch (err) {
-        console.error("❌ Error closing connection:", err);
-      }
-    }
+    if (conn) try { await conn.close(); } catch (e) { /* ignore */ }
   }
 };
+
+// Helper pour décoder JSON en sécurité
+function parseJsonSafe(value) {
+  try {
+    return value ? JSON.parse(value) : [];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Récupérer une demande d'agence par ID
@@ -742,60 +662,3 @@ exports.getAgencyStats = async (req, res) => {
     }
   }
 };
-
-
-
-
-// // ============================================
-// // FILE: app.js (Configuration principale)
-// // ============================================
-
-// const express = require('express');
-// const cors = require('cors');
-// const agencyRoutes = require('./routes/agencyRoutes');
-
-// const app = express();
-
-// // Middlewares
-// app.use(cors());
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-
-// // Routes
-// app.use('/api/agency', agencyRoutes);
-
-// // Route de santé
-// app.get('/api/health', (req, res) => {
-//   res.json({
-//     status: 'OK',
-//     timestamp: new Date().toISOString(),
-//     service: 'Agency Management API'
-//   });
-// });
-
-// // Gestion des erreurs 404
-// app.use((req, res) => {
-//   res.status(404).json({
-//     success: false,
-//     message: 'Route non trouvée'
-//   });
-// });
-
-// // Gestion des erreurs globales
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).json({
-//     success: false,
-//     message: 'Erreur serveur',
-//     error: err.message
-//   });
-// });
-
-// const PORT = process.env.PORT || 3000;
-
-// app.listen(PORT, () => {
-//   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-//   console.log(`📍 API disponible sur http://localhost:${PORT}/api/agency`);
-// });
-
-// module.exports = app;
