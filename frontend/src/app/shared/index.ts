@@ -27,9 +27,14 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { GeneriqueInputComponent } from './components/generique-input/generique-input.component';
+import { StepFormComponent } from './components/step-form/step-form.component';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+
 
 export const COMPONENTS = [
-  GeneriqueInputComponent
+  GeneriqueInputComponent,
+  StepFormComponent
 ];
 
 export const IMPORTS = [
@@ -37,6 +42,8 @@ export const IMPORTS = [
   FlexLayoutModule,
   MatTabsModule,
   MatRippleModule,
+  CdkTextareaAutosize,
+  TextFieldModule,
   FormsModule,
   MatSlideToggleModule,
   MatButtonToggleModule,
@@ -68,5 +75,6 @@ export const EXPORTS = [
   CommonModule,
   FlexLayoutModule,
   MatRippleModule,
+  StepFormComponent,
   GeneriqueInputComponent
 ];

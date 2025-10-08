@@ -1,0 +1,115 @@
+//* Margins with Media Queries */
+@for $i from 1 through 100 {
+  /* Default Margins */
+  .m-#{$i} {
+    margin: #{$i}px;
+  }
+  .mt-#{$i} {
+    margin-top: #{$i}px;
+  }
+  .mb-#{$i} {
+    margin-bottom: #{$i}px;
+  }
+  .mr-#{$i} {
+    margin-right: #{$i}px;
+  }
+  .ml-#{$i} {
+    margin-left: #{$i}px;
+  }
+
+  /* Small Screens */
+  @media (max-width: 767px) {
+    .m-sm-#{$i} {
+      margin: #{$i}px;
+    }
+    .mt-sm-#{$i} {
+      margin-top: #{$i}px;
+    }
+    .mb-sm-#{$i} {
+      margin-bottom: #{$i}px;
+    }
+    .mr-sm-#{$i} {
+      margin-right: #{$i}px;
+    }
+    .ml-sm-#{$i} {
+      margin-left: #{$i}px;
+    }
+  }
+
+  /* Medium Screens */
+  @media (min-width: 768px) and (max-width: 991px) {
+    .m-md-#{$i} {
+      margin: #{$i}px;
+    }
+    .mt-md-#{$i} {
+      margin-top: #{$i}px;
+    }
+    .mb-md-#{$i} {
+      margin-bottom: #{$i}px;
+    }
+    .mr-md-#{$i} {
+      margin-right: #{$i}px;
+    }
+    .ml-md-#{$i} {
+      margin-left: #{$i}px;
+    }
+  }
+}
+
+/* Padding with Media Queries */
+@for $i from 1 through 100 {
+  /* Default Padding */
+  .p-#{$i} {
+    padding: #{$i}px;
+  }
+  .pt-#{$i} {
+    padding-top: #{$i}px;
+  }
+  .pb-#{$i} {
+    padding-bottom: #{$i}px;
+  }
+  .pr-#{$i} {
+    padding-right: #{$i}px;
+  }
+  .pl-#{$i} {
+    padding-left: #{$i}px;
+  }
+
+  /* Small Screens */
+  @media (max-width: 767px) {
+    .p-sm-#{$i} {
+      padding: #{$i}px !important;
+    }
+    .pt-sm-#{$i} {
+      padding-top: #{$i}px !important;
+    }
+    .pb-sm-#{$i} {
+      padding-bottom: #{$i}px !important;
+    }
+    .pr-sm-#{$i} {
+      padding-right: #{$i}px !important;
+    }
+    .pl-sm-#{$i} {
+      padding-left: #{$i}px !important;
+    }
+  }
+
+  /* Medium Screens */
+  @media (min-width: 768px) and (max-width: 991px) {
+    .p-md-#{$i} {
+      padding: #{$i}px !important;
+    }
+    .pt-md-#{$i} {
+      padding-top: #{$i}px !important;
+    }
+    .pb-md-#{$i} {
+      padding-bottom: #{$i}px !important;
+    }
+    .pr-md-#{$i} {
+      padding-right: #{$i}px !important;
+    }
+    .pl-md-#{$i} {
+      padding-left: #{$i}px !important;
+    }
+  }
+}

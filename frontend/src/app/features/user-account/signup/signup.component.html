@@ -1,43 +1,77 @@
-<div fxLayout="row" fxLayout.xs="column" fxFill>
-    <div fxFlex="50" fxFlex.xs="100" class="login-form-section">
-      <div>
+<div fxLayout="row" fxLayout.xs="column" fxFill class="login-layout">
+  <!-- Section gauche -->
+  <div fxFlex="60" fxFlex.xs="100" class="container">
+    <div class="content-wrapper">
+      <a class="logo-link" [routerLink]="['/']" fxLayout="row" fxLayoutAlign="center center">
+        <img src="../../../../assets/images/logos/logo.png" alt="Logo" class="logo" width="120" />
+      </a>
 
-        <a class="mb-4" [routerLink]="['/']" fxLayout="row" fxLayoutAlign="space-around center">
-          <img src="../../../../assets/images/logos/logo.png" alt="Logo" class="logo" width="120" />
-        </a>
-  
-        <mat-card class="login-card">
-          <h2 class="mb-1 mt-4 mx-4" style="margin: 2rem;">Connectez-vous pour continuer</h2>
-          <p class="login-description mb-4 mx-4" style="margin: 1rem;">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-          </p>
-  
-          <mat-card-content style="margin-top: 1rem;">
-            <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-              <div class="grid-form">
-                <div *ngFor="let field of fields" [ngClass]="field.size">
-                  <app-generique-input 
-                    [control]="getFormControl(field.code)"
-                    [label]="field.label" 
-                    [field]="field" 
-                    [placeholder]="field.label"
-                    [submitted]="submitted">
-                  </app-generique-input>
+      <mat-card class="login-card">
+        <h2 class="login-title">Connectez-vous pour continuer</h2>
+        <p class="login-description">
+          Lorem Ipsum est simplement un faux texte de l’industrie de l’impression et de la composition.
+        </p>
+
+        <mat-card-content>
+          <div class="agency-request-container" fxLayout="column" fxLayoutGap="24px">
+            <h2 class="form-title" fxLayoutAlign="center center">Demande d’ouverture d’agence</h2>
+
+            <mat-horizontal-stepper linear #stepper>
+              <!-- Étape 1 -->
+              <mat-step [stepControl]="forms[0]">
+                <ng-template matStepLabel>Informations personnelles</ng-template>
+                <app-step-form [fields]="personalFields" (formReady)="onStepFormReady($event, 0)"></app-step-form>
+                <div class="step-buttons" fxLayoutAlign="end center">
+                  <button mat-raised-button color="primary" matStepperNext>Suivant</button>
                 </div>
-              </div>
+              </mat-step>
 
-              <button class="main-btn full-width" type="submit" [disabled]="loading">
-                <ng-container *ngIf="!loading; else loadingTemplate">Connexion</ng-container>
-                <ng-template #loadingTemplate>
-                  <mat-spinner diameter="24"></mat-spinner>
-                </ng-template>
-              </button>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </div>
+              <!-- Étape 2 -->
+              <mat-step [stepControl]="forms[1]">
+                <ng-template matStepLabel>Expériences professionnelles</ng-template>
+                <app-step-form [fields]="experienceFields" (formReady)="onStepFormReady($event, 1)"></app-step-form>
+                <div class="step-buttons" fxLayoutAlign="space-between center">
+                  <button mat-stroked-button matStepperPrevious>Précédent</button>
+                  <button mat-raised-button color="primary" matStepperNext>Suivant</button>
+                </div>
+              </mat-step>
+
+              <!-- Étape 3 -->
+              <mat-step [stepControl]="forms[2]">
+                <ng-template matStepLabel>Informations sur l’agence</ng-template>
+                <app-step-form [fields]="agencyFields" (formReady)="onStepFormReady($event, 2)"></app-step-form>
+                <div class="step-buttons" fxLayoutAlign="space-between center">
+                  <button mat-stroked-button matStepperPrevious>Précédent</button>
+                  <button mat-raised-button color="primary" matStepperNext>Suivant</button>
+                </div>
+              </mat-step>
+
+              <!-- Étape 4 -->
+              <mat-step [stepControl]="forms[3]">
+                <ng-template matStepLabel>Questionnaire</ng-template>
+                <app-step-form [fields]="questionnaireFields" (formReady)="onStepFormReady($event, 3)"></app-step-form>
+                <div class="step-buttons" fxLayoutAlign="space-between center">
+                  <button mat-stroked-button matStepperPrevious>Précédent</button>
+                  <button mat-raised-button color="primary" matStepperNext>Suivant</button>
+                </div>
+              </mat-step>
+
+              <!-- Étape 5 -->
+              <mat-step [stepControl]="forms[4]">
+                <ng-template matStepLabel>Business Plan</ng-template>
+                <app-step-form [fields]="businessPlanFields" (formReady)="onStepFormReady($event, 4)"></app-step-form>
+                <div class="step-buttons" fxLayoutAlign="space-between center">
+                  <button mat-stroked-button matStepperPrevious>Précédent</button>
+                  <button mat-raised-button color="accent" (click)="onSubmit()">Soumettre</button>
+                </div>
+              </mat-step>
+            </mat-horizontal-stepper>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
-  
-    <div fxFlex="50" fxFlex.xs="0" class="background-section"></div>
+  </div>
+
+  <!-- Section droite -->
+  <div fxFlex="40" fxFlex.xs="0" class="background-section"></div>
 </div>
-  

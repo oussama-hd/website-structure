@@ -1,12 +1,6 @@
 import { Component } from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import { Router } from '@angular/router';
-import { SnackbarService } from '../../../services/snackbar.service';
+import { FormGroup } from '@angular/forms';
+import { Field } from '../../../models/field';
 import { UserService } from '../../../services/user.service';
 
 @Component({
@@ -16,71 +10,91 @@ import { UserService } from '../../../services/user.service';
   styleUrl: './signup.component.scss',
 })
 export class SignupComponent {
-  signupForm: FormGroup;
-  submitted = false;
-  communes: any[] = [];
-  loading: boolean = false;
 
-  fields = [
-    { code: 'AUS_FIRSTNAME', label: 'Prénom', obligatoire: true, size: 'w-50', order: 1, type: 'T' },
-    { code: 'AUS_LASTNAME', label: 'Nom', obligatoire: false, size: 'w-50', order: 2, type: 'T' },
-    { code: 'AUS_BIRTHDATE', label: 'Date de naissance', obligatoire: false, size: 'w-50', order: 3, type: 'D' },
-    { code: 'AUS_AGE', label: 'Âge', obligatoire: false, size: 'w-50', order: 4, type: 'N' },
-    { code: 'AUS_ADDRESS', label: 'Adresse', obligatoire: false, size: 'w-100', order: 5, type: 'T' },
-    { code: 'AUS_EMAIL', label: 'Email', obligatoire: true, size: 'w-100', order: 6, type: 'T' },
-    { code: 'AUS_PHONE', label: 'Téléphone', obligatoire: false, size: 'w-100', order: 7, type: 'T' },
-    { code: 'AUS_SEXE', label: 'Sexe', obligatoire: false, size: 'w-50', order: 8, type: 'L', options: [] }
-  ]
-  
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private snackbarService: SnackbarService,
-    private userService: UserService
-  ) {
-    this.signupForm = this.fb.group({
-      AUS_FIRSTNAME: [null, [Validators.required]],   
-      AUS_LASTNAME: [null],  
-      AUS_BIRTHDATE: [null],   
-      AUS_AGE: [null, [Validators.pattern(/^[0-9]+$/)]],
-      AUS_ADDRESS: [null], 
-      AUS_EMAIL: [null, [Validators.required, Validators.email]],
-      AUS_PHONE: [null],
-      AUS_SEXE: [null], 
-    });    
-  }
+forms: FormGroup[] = [];
 
-  ngOnInit(): void {}
+constructor(private agencyService: UserService) {}
 
-  getFormControl(name: string): FormControl {
-    return this.signupForm.get(name) as FormControl;
-  }
+// 🧍 Étape 1 — Informations personnelles
+personalFields: Field[] = [
+  { code: 'AUS_FIRSTNAME', label: 'Prénom', obligatoire: true, order: 1, type: 'T' },
+  { code: 'AUS_LASTNAME', label: 'Nom', obligatoire: true, order: 2, type: 'T' },
+  { code: 'AUS_PHONE', label: 'Téléphone', obligatoire: true, order: 3, type: 'R' },
+  { code: 'AUS_SEXE', label: 'Sexe', obligatoire: false, order: 4, type: 'L', options: [
+    { label: 'Homme', value: 'M' , order : 1},
+    { label: 'Femme', value: 'F' , order : 2}
+  ]},
+  { code: 'AUS_EMAIL', label: 'Email', obligatoire: true, order: 5, type: 'T' },
+  { code: 'AUS_ADDRESS', label: 'Adresse', obligatoire: false, order: 6, type: 'T' },
+  { code: 'AUS_BIRTHDATE', label: 'Date de naissance', obligatoire: false, order: 7, type: 'D' }
+];
 
-  onSubmit() {
-    this.submitted = true;
-    this.loading = true;
-  
-    const formValue = {
-      ...this.signupForm.value,
-    };
-  
-    const encryptedFormGroup = new FormGroup({});
-    Object.entries(formValue).forEach(([key, value]) => {
-      encryptedFormGroup.addControl(key, new FormControl(value));
-    });
+// 💼 Étape 2 — Expériences professionnelles
+experienceFields: Field[] = [
+  { code: 'AUS_EDUCATION_LEVEL', label: 'Niveau d’éducation', obligatoire: false, order: 1, type: 'L', options: [
+    { label: 'Licence', value: 'licence' , order : 1},
+    { label: 'Master', value: 'master' , order: 2},
+    { label: 'Doctorat', value: 'doctorat' , order : 3}
+  ]},
+  { code: 'AUS_INSURANCE_EXPERIENCE', label: 'Expérience en assurance (années)', obligatoire: false, order: 2, type: 'V' },
+  { code: 'AUS_DIPLOMAS', label: 'Diplômes', obligatoire: false, order: 3, type: 'F' },
+  { code: 'AUS_CERTIFICATES', label: 'Certificats', obligatoire: false, order: 4, type: 'F' }
+];
 
-    console.log("--------------------- ********************/////////\\\\\\\\\************************** ---------------------", this.signupForm.value)
+// 🏢 Étape 3 — Informations sur l’agence
+agencyFields: Field[] = [
+  { code: 'AUS_HAS_LOCATION', label: 'Disposez-vous d’un local ?', obligatoire: true, order: 1, type: 'S' },
+  { code: 'AUS_LOCATION_STATUS', label: 'Statut du local', obligatoire: false, order: 2, type: 'L', options: [
+    { label: 'Propriétaire', value: 'proprietaire' , order : 1},
+    { label: 'Locataire', value: 'locataire' , order : 2}
+  ]},
+  { code: 'AUS_WILAYA', label: 'Wilaya', obligatoire: true, order: 3, type: 'T' },
+  { code: 'AUS_COMMUNE', label: 'Commune', obligatoire: true, order: 4, type: 'T' },
+  { code: 'AUS_EXACT_ADDRESS', label: 'Adresse exacte', obligatoire: true, order: 5, type: 'T' }
+];
 
-this.userService.addUser(this.signupForm.value).subscribe({
-      next: (res) => {
-        this.loading = false;
-        this.snackbarService.success('Vous êtes enregistré avec succès !');
-        this.router.navigate(['/otp']);
-      },
-      error: (error) => {
-        this.loading = false;
-        // this.snackbarService.error(error.error.msg || 'Une erreur est survenue.');
-      }
-    });
-  }  
+// 🧠 Étape 4 — Questionnaire
+questionnaireFields: Field[] = [
+  { code: 'AUS_MOTIVATION', label: 'Motivation', obligatoire: true, order: 1, type: 'TTA' },
+  { code: 'AUS_REASON_CHOICE', label: 'Raisons du choix de la région', obligatoire: false, order: 2, type: 'TTA' },
+  { code: 'AUS_ROADMAP', label: 'Plan de développement (roadmap)', obligatoire: false, order: 3, type: 'TTA' },
+  { code: 'AUS_RECRUITMENT_COUNT', label: 'Nombre de recrutements prévus', obligatoire: false, order: 4, type: 'TTA' },
+  { code: 'AUS_ESTIMATED_REVENUE', label: 'Chiffre d’affaires estimé (DA)', obligatoire: false, order: 5, type: 'TTA' }
+];
+
+// 📊 Étape 5 — Business Plan (Années 1 à 3)
+businessPlanFields: Field[] = [
+  { code: 'AUS_BP_Y1_AUTO', label: 'Année 1 - Auto', obligatoire: false, order: 1, type: 'V' },
+  { code: 'AUS_BP_Y1_SIMPLE_RISKS', label: 'Année 1 - Risques simples', obligatoire: false, order: 2, type: 'V' },
+  { code: 'AUS_BP_Y1_FLEETS', label: 'Année 1 - Flottes', obligatoire: false, order: 3, type: 'V' },
+  { code: 'AUS_BP_Y1_MULTIRISKS', label: 'Année 1 - Multirisques', obligatoire: false, order: 4, type: 'V' },
+  { code: 'AUS_BP_Y2_AUTO', label: 'Année 2 - Auto', obligatoire: false, order: 5, type: 'V' },
+  { code: 'AUS_BP_Y2_SIMPLE_RISKS', label: 'Année 2 - Risques simples', obligatoire: false, order: 6, type: 'V' },
+  { code: 'AUS_BP_Y2_FLEETS', label: 'Année 2 - Flottes', obligatoire: false, order: 7, type: 'V' },
+  { code: 'AUS_BP_Y2_MULTIRISKS', label: 'Année 2 - Multirisques', obligatoire: false, order: 8, type: 'V' },
+  { code: 'AUS_BP_Y3_AUTO', label: 'Année 3 - Auto', obligatoire: false, order: 9, type: 'V' },
+  { code: 'AUS_BP_Y3_SIMPLE_RISKS', label: 'Année 3 - Risques simples', obligatoire: false, order: 10, type: 'V' },
+  { code: 'AUS_BP_Y3_FLEETS', label: 'Année 3 - Flottes', obligatoire: false, order: 11, type: 'V' },
+  { code: 'AUS_BP_Y3_MULTIRISKS', label: 'Année 3 - Multirisques', obligatoire: false, order: 12, type: 'V' }
+];
+
+onStepFormReady(form: FormGroup, index: number) {
+  this.forms[index] = form;
+}
+
+onSubmit() {
+  const fullFormData = this.forms.reduce((acc, fg) => ({ ...acc, ...fg.value }), {});
+  console.log('📤 Données envoyées:', fullFormData);
+
+  this.agencyService.addUser(fullFormData).subscribe({
+    next: (res) => {
+      console.log('✅ Enregistré avec succès', res);
+      alert(`Demande enregistrée avec succès (Référence: ${res.data?.reference || 'N/A'})`);
+    },
+    error: (err) => {
+      console.error('❌ Erreur:', err);
+      alert('Erreur lors de l’envoi du formulaire.');
+    }
+  });
+}
 }
